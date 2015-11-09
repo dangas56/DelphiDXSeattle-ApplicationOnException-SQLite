@@ -1,0 +1,103 @@
+object Form1: TForm1
+  Left = 0
+  Top = 0
+  Caption = 'Form1'
+  ClientHeight = 480
+  ClientWidth = 640
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  OnCreate = FormCreate
+  DesignerMasterStyle = 0
+  object btn1: TButton
+    Position.X = 192.000000000000000000
+    Position.Y = 56.000000000000000000
+    Size.Width = 121.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 1
+    Text = 'Adds data to DB'
+    OnClick = btn1Click
+  end
+  object btn2: TButton
+    Position.X = 192.000000000000000000
+    Position.Y = 96.000000000000000000
+    Size.Width = 121.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 5
+    Text = 'fails to add to DB'
+    OnClick = btn2Click
+  end
+  object strngrd1: TStringGrid
+    Position.X = 168.000000000000000000
+    Position.Y = 256.000000000000000000
+    Size.Width = 361.000000000000000000
+    Size.Height = 177.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 6
+    RowCount = 100
+    RowHeight = 21.000000000000000000
+    Viewport.Width = 341.000000000000000000
+    Viewport.Height = 152.000000000000000000
+  end
+  object con1: TFDConnection
+    Params.Strings = (
+      'Database=test'
+      'DriverID=SQLite')
+    UpdateOptions.AssignedValues = [uvUpdateChngFields, uvUpdateMode, uvLockMode, uvLockPoint, uvLockWait, uvRefreshMode, uvFetchGeneratorsPoint, uvCheckRequired, uvCheckReadOnly, uvCheckUpdatable, uvAutoCommitUpdates]
+    UpdateOptions.UpdateChangedFields = False
+    UpdateOptions.LockWait = True
+    UpdateOptions.RefreshMode = rmManual
+    UpdateOptions.FetchGeneratorsPoint = gpNone
+    UpdateOptions.CheckRequired = False
+    UpdateOptions.CheckReadOnly = False
+    UpdateOptions.CheckUpdatable = False
+    UpdateOptions.AutoCommitUpdates = True
+    LoginPrompt = False
+    Left = 144
+    Top = 128
+  end
+  object qry1: TFDQuery
+    Connection = con1
+    Left = 208
+    Top = 128
+  end
+  object fdgxwtcrsr1: TFDGUIxWaitCursor
+    Provider = 'FMX'
+    Left = 344
+    Top = 136
+  end
+  object tb1: TFDTable
+    Connection = con1
+    UpdateOptions.UpdateTableName = 'TEST'
+    TableName = 'TEST'
+    Left = 192
+    Top = 200
+    object tb1test: TStringField
+      FieldName = 'test'
+      Size = 255
+    end
+  end
+  object bndsrcdb1: TBindSourceDB
+    DataSet = tb1
+    ScopeMappings = <>
+    Left = 304
+    Top = 224
+  end
+  object bndngslst1: TBindingsList
+    Methods = <>
+    OutputConverters = <>
+    Left = 20
+    Top = 5
+    object lnkgrdtdtsrcBindSourceDB: TLinkGridToDataSource
+      Category = 'Quick Bindings'
+      DataSource = bndsrcdb1
+      GridControl = strngrd1
+      Columns = <
+        item
+          MemberName = 'test'
+        end>
+    end
+  end
+end
