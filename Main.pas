@@ -19,7 +19,6 @@ type
   TForm1 = class(TForm)
     con1: TFDConnection;
     btn1: TButton;
-    qry1: TFDQuery;
     fdgxwtcrsr1: TFDGUIxWaitCursor;
     tb1: TFDTable;
     btn2: TButton;
@@ -47,10 +46,34 @@ implementation
 {$R *.fmx}
 
 procedure TForm1.AddData(aString: String);
+var qry1 : TFDQuery;
+    tbTest : TFDTable;
 begin
-  tb1.Append;
-  tb1.FieldByName('test').AsString := aString;
-  tb1.Post;
+     {
+  tbTest := TFDTable.Create(nil);
+  try
+    tbTest.Connection := con1;
+    tbTest.TableName := 'TEST';
+    tbTest.Open();
+
+    tbTest.Append;
+    tbTest.FieldByName('test').AsString := aString;
+    tbTest.Post;
+
+  finally
+    tbTest.Free;
+  end;  }
+
+  qry1 := TFDQuery.Create(nil);
+  try
+    qry1.Connection := con1;
+    qry1.SQL.Clear;
+    qry1.SQL.Add('insert into test (test) values ( :Testing )');
+    qry1.ParamByName('Testing').AsString := aString;
+    qry1.ExecSQL;
+  finally
+    qry1.Free;
+  end;
   tb1.Close;
   con1.close();
   con1.Open();
@@ -70,17 +93,24 @@ end;
 
 procedure TForm1.btn2Click(Sender: TObject);
 begin
-  raise Exception.Create('Error Message');
+  raise Exception.Create('Error Message ' + FormatDateTime('dd/mmm/yyyy HH:NN:SS', now));
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
+var qry1 : TFDQuery;
 begin
   con1.Open();
   if con1.Connected then begin
-    qry1.SQL.Clear;
-    qry1.SQL.Add
-   ('Create Table if not Exists TEST(test char(255));');
-    qry1.ExecSQL;
+    qry1 := TFDQuery.Create(nil);
+    qry1.Connection := con1;
+    try
+      qry1.SQL.Clear;
+      qry1.SQL.Add
+     ('Create Table if not Exists TEST(test char(255));');
+    finally
+      qry1.ExecSQL;
+      qry1.Free;
+    end;
     tb1.Open();
   end;
   Application.OnException := AppException;
