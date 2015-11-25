@@ -9,37 +9,78 @@ object Form1: TForm1
   FormFactor.Devices = [Desktop]
   OnCreate = FormCreate
   DesignerMasterStyle = 0
-  object btn1: TButton
-    Position.X = 192.000000000000000000
-    Position.Y = 56.000000000000000000
-    Size.Width = 121.000000000000000000
-    Size.Height = 22.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 1
-    Text = 'Adds data to DB'
-    OnClick = btn1Click
-  end
-  object btn2: TButton
-    Position.X = 192.000000000000000000
-    Position.Y = 96.000000000000000000
-    Size.Width = 121.000000000000000000
-    Size.Height = 22.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 5
-    Text = 'fails to add to DB'
-    OnClick = btn2Click
-  end
   object strngrd1: TStringGrid
-    Position.X = 168.000000000000000000
-    Position.Y = 256.000000000000000000
-    Size.Width = 361.000000000000000000
-    Size.Height = 177.000000000000000000
+    Align = Right
+    Position.X = 376.000000000000000000
+    Size.Width = 264.000000000000000000
+    Size.Height = 480.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 6
+    TabOrder = 4
     RowCount = 100
     RowHeight = 21.000000000000000000
-    Viewport.Width = 341.000000000000000000
-    Viewport.Height = 152.000000000000000000
+    Viewport.Width = 244.000000000000000000
+    Viewport.Height = 439.000000000000000000
+  end
+  object lyt1: TLayout
+    Align = Client
+    Size.Width = 376.000000000000000000
+    Size.Height = 480.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 10
+    object btnTableNonExc: TButton
+      Align = Top
+      Position.Y = 65.000000000000000000
+      Size.Width = 376.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 2
+      Text = '1 Works > Add Data via TfdTable - non Exception'
+      TextSettings.HorzAlign = Leading
+      OnClick = btnTableNonExcClick
+    end
+    object btnTableExcept: TButton
+      Align = Top
+      StyledSettings = [Family, Size, FontColor]
+      Position.Y = 87.000000000000000000
+      Size.Width = 376.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 7
+      Text = '2 Fails > Add Data via TfdTable - Exception'
+      TextSettings.HorzAlign = Leading
+      OnClick = btnTableExceptClick
+    end
+    object btnQryExcpt: TButton
+      Align = Top
+      Position.Y = 131.000000000000000000
+      Size.Width = 376.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 6
+      Text = '4 Works > Add Data via TfdQuery - Exception'
+      TextSettings.HorzAlign = Leading
+      OnClick = btnQryExcptClick
+    end
+    object btnQueryNonExc: TButton
+      Align = Top
+      Position.Y = 109.000000000000000000
+      Size.Width = 376.000000000000000000
+      Size.Height = 22.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 1
+      Text = '3 Works > Add Data via TfdQuery - non Exception'
+      TextSettings.HorzAlign = Leading
+      OnClick = btnQueryNonExcClick
+    end
+    object lbl1: TLabel
+      Align = Top
+      Size.Width = 376.000000000000000000
+      Size.Height = 65.000000000000000000
+      Size.PlatformDefault = False
+      Text = 
+        'The button "2 Fails > Add Data via TfdTable - Exception"'#13#10'fails ' +
+        'in DX Seattle'#13#10'works in XE8'
+    end
   end
   object con1: TFDConnection
     Params.Strings = (
@@ -64,6 +105,9 @@ object Form1: TForm1
   end
   object tb1: TFDTable
     Connection = con1
+    UpdateOptions.AssignedValues = [uvUpdateMode, uvCheckUpdatable, uvAutoCommitUpdates]
+    UpdateOptions.UpdateMode = upWhereAll
+    UpdateOptions.CheckUpdatable = False
     UpdateOptions.UpdateTableName = 'TEST'
     TableName = 'TEST'
     Left = 192
@@ -82,8 +126,8 @@ object Form1: TForm1
   object bndngslst1: TBindingsList
     Methods = <>
     OutputConverters = <>
-    Left = 20
-    Top = 5
+    Left = 508
+    Top = 37
     object lnkgrdtdtsrcBindSourceDB: TLinkGridToDataSource
       Category = 'Quick Bindings'
       DataSource = bndsrcdb1
@@ -92,6 +136,12 @@ object Form1: TForm1
         item
           MemberName = 'test'
         end>
+      DefaultColumnWidth = 300
     end
+  end
+  object tmr1: TTimer
+    OnTimer = tmr1Timer
+    Left = 144
+    Top = 248
   end
 end

@@ -16,23 +16,36 @@ uses
   Data.Bind.Grid, Data.Bind.DBScope, FMX.Layouts, FMX.Grid;
 
 type
+  Exception_TableTest = class(Exception);
+  Exception_QryTest = class(Exception);
+
+  TAddDataVia = (adTable, adQuery);
+
   TForm1 = class(TForm)
     con1: TFDConnection;
-    btn1: TButton;
     fdgxwtcrsr1: TFDGUIxWaitCursor;
     tb1: TFDTable;
-    btn2: TButton;
     strngrd1: TStringGrid;
     tb1test: TStringField;
     bndsrcdb1: TBindSourceDB;
     bndngslst1: TBindingsList;
     lnkgrdtdtsrcBindSourceDB: TLinkGridToDataSource;
+    lyt1: TLayout;
+    btnTableNonExc: TButton;
+    btnTableExcept: TButton;
+    btnQryExcpt: TButton;
+    btnQueryNonExc: TButton;
+    tmr1: TTimer;
+    lbl1: TLabel;
     procedure FormCreate(Sender: TObject);
-    procedure btn1Click(Sender: TObject);
-    procedure btn2Click(Sender: TObject);
+    procedure btnTableNonExcClick(Sender: TObject);
+    procedure btnTableExceptClick(Sender: TObject);
+    procedure btnQueryNonExcClick(Sender: TObject);
+    procedure btnQryExcptClick(Sender: TObject);
+    procedure tmr1Timer(Sender: TObject);
   private
     { Private declarations }
-    procedure AddData(aString : String);
+    procedure AddData(aString : String; addVia : TAddDataVia);
   public
     { Public declarations }
     procedure AppException(Sender: TObject; e: Exception);
@@ -45,35 +58,49 @@ implementation
 
 {$R *.fmx}
 
-procedure TForm1.AddData(aString: String);
-var qry1 : TFDQuery;
-    tbTest : TFDTable;
-begin
-     {
-  tbTest := TFDTable.Create(nil);
-  try
-    tbTest.Connection := con1;
-    tbTest.TableName := 'TEST';
-    tbTest.Open();
-
-    tbTest.Append;
-    tbTest.FieldByName('test').AsString := aString;
-    tbTest.Post;
-
-  finally
-    tbTest.Free;
-  end;  }
-
-  qry1 := TFDQuery.Create(nil);
-  try
-    qry1.Connection := con1;
-    qry1.SQL.Clear;
-    qry1.SQL.Add('insert into test (test) values ( :Testing )');
-    qry1.ParamByName('Testing').AsString := aString;
-    qry1.ExecSQL;
-  finally
-    qry1.Free;
+procedure TForm1.AddData(aString: String; addVia : TAddDataVia);
+  procedure AddUsingFDTable(aStr : String);
+  var tbTest : TFDTable;
+  begin
+    tbTest := TFDTable.Create(nil);
+    try
+      tbTest.UpdateOptions.AutoCommitUpdates := true;
+      tbTest.UpdateOptions.UpdateMode := upWhereAll;
+      tbTest.Connection := con1;
+      tbTest.TableName := 'TEST';
+      tbTest.Open();
+      tbTest.Append;
+      tbTest.FieldByName('test').AsString := aStr;
+      tbTest.Post;
+      tbTest.Close;
+    finally
+      tbTest.Free;
+    end;
   end;
+
+  procedure AddusingFDQuery(aStr : String);
+  var qry1 : TFDQuery;
+  begin
+    qry1 := TFDQuery.Create(nil);
+    try
+      qry1.Connection := con1;
+      qry1.SQL.Clear;
+      qry1.SQL.Add('insert into test (test) values ( :Testing )');
+      qry1.ParamByName('Testing').AsString := aStr;
+      qry1.ExecSQL;
+    finally
+      qry1.Free;
+    end;
+  end;
+
+begin
+  case addVia of
+    adTable: AddUsingFDTable(aString);
+    adQuery: AddusingFDQuery(aString);
+    else
+      AddUsingFDTable(aString);
+  end;
+
   tb1.Close;
   con1.close();
   con1.Open();
@@ -82,18 +109,31 @@ end;
 
 procedure TForm1.AppException(Sender: TObject; e: Exception);
 begin
-  AddData(e.Message);
+  if e.ClassType = Exception_QryTest then
+    AddData(e.Message, adQuery)
+  else
+    AddData(e.Message, adTable);
   Application.ShowException(e);
 end;
 
-procedure TForm1.btn1Click(Sender: TObject);
+procedure TForm1.btnTableNonExcClick(Sender: TObject);
 begin
-  AddData('btn1Click');
+  AddData( TButton(Sender).Name + '-Click-Table' , adTable);
 end;
 
-procedure TForm1.btn2Click(Sender: TObject);
+procedure TForm1.btnQryExcptClick(Sender: TObject);
 begin
-  raise Exception.Create('Error Message ' + FormatDateTime('dd/mmm/yyyy HH:NN:SS', now));
+  raise Exception_QryTest.Create('QueryTestError ' + FormatDateTime('dd/mmm/yyyy HH:NN:SS', now));
+end;
+
+procedure TForm1.btnQueryNonExcClick(Sender: TObject);
+begin
+  AddData( TButton(Sender).Name + '-Click-Query' , adQuery);
+end;
+
+procedure TForm1.btnTableExceptClick(Sender: TObject);
+begin
+  raise Exception_TableTest.Create('TableTestError ' + FormatDateTime('dd/mmm/yyyy HH:NN:SS', now));
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
@@ -114,6 +154,19 @@ begin
     tb1.Open();
   end;
   Application.OnException := AppException;
+end;
+
+procedure TForm1.tmr1Timer(Sender: TObject);
+begin
+  tmr1.Enabled := false;
+  try
+    if not (TFontStyle.fsBold in btnTableExcept.TextSettings.Font.Style) then
+      btnTableExcept.TextSettings.Font.Style := btnTableExcept.TextSettings.Font.Style + [ TFontStyle.fsBold]
+    else
+      btnTableExcept.TextSettings.Font.Style := btnTableExcept.TextSettings.Font.Style - [ TFontStyle.fsBold];
+  finally
+    tmr1.Enabled := true;
+  end;
 end;
 
 end.

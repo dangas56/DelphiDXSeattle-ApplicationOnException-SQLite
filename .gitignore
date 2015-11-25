@@ -1,0 +1,11 @@
+hooks/
+ErrorLog.dproj.local
+ErrorLog.identcache
+ErrorLog.stat
+HEAD
+info/
+config
+description
+Win32/
+Main.vlb
+ErrorLog.res
